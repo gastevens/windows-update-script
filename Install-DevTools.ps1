@@ -81,7 +81,10 @@ $romManagementTools = @(
     @{ Name = "Rufus.Rufus"; Source = "winget"; Description = "Bootable USB creator tool" },
     @{ Name = "mame-tools"; Source = "choco"; Description = "Tools for MAME ROM management" },
     @{ Name = "sabretools"; Source = "choco"; Description = "Tools for ROM identification and management" },
-    @{ Name = "romvault"; Source = "choco"; Description = "ROM collection management and verification" }
+    @{ Name = "romvault"; Source = "choco"; Description = "ROM collection management and verification" },
+    
+    # 1G1R (One Game, One ROM) tools
+    @{ Name = "1g1r"; Source = "choco"; Description = "One Game One ROM set management tools" }
 )
 
 # Create a new category for handheld device management tools
@@ -98,7 +101,11 @@ $supportingTools = @(
     @{ Name = "ffmpeg"; Source = "choco"; Description = "Video and audio processing tools" },
     @{ Name = "handbrake"; Source = "choco"; Description = "Video transcoder" },
     @{ Name = "youtube-dl"; Source = "choco"; Description = "YouTube downloader" },
-    @{ Name = "geforce-game-ready-driver"; Source = "choco"; Description = "NVIDIA GeForce Drivers" }
+    @{ Name = "geforce-game-ready-driver"; Source = "choco"; Description = "NVIDIA GeForce Drivers" },
+    
+    # Download management
+    @{ Name = "JDownloader.JDownloader"; Source = "winget"; Description = "Download management tool" },
+    @{ Name = "jdownloader2"; Source = "choco"; Description = "Download management tool (Alternative source)" }
 )
 
 # Function to write to log file and console
@@ -268,7 +275,25 @@ function Install-Package {
         return $false
     }
     
-    # Install the package using the appropriate package manager
+    # Special handling for packages that might have availability issues
+    if ($Package.Name -eq "1g1r" -or $Package.Name -eq "jdownloader2") {
+        Write-Log -Message "Attempting to install optional package '$($Package.Name)' ($($Package.Description))..." -Level 'Info'
+        try {
+            if ($Package.Source -eq "winget") {
+                return Install-WingetPackage -PackageId $Package.Name -Description $Package.Description
+            }
+            elseif ($Package.Source -eq "choco") {
+                return Install-ChocolateyPackage -PackageName $Package.Name -Description $Package.Description
+            }
+        }
+        catch {
+            Write-Log -Message "Optional package '$($Package.Name)' installation failed, but continuing: $_" -Level 'Warning'
+            $script:installationSummary.Failed += "$($Package.Name) ($($Package.Description)) - Warning: Optional package failed"
+            return $false
+        }
+    }
+    
+    # Standard package installation
     if ($Package.Source -eq "winget") {
         return Install-WingetPackage -PackageId $Package.Name -Description $Package.Description
     }
