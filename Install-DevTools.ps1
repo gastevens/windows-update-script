@@ -56,7 +56,19 @@ $fpgaTools = @(
     @{ Name = "nextpnr"; Source = "choco"; Description = "FPGA place-and-route tool" },
     @{ Name = "yosys"; Source = "choco"; Description = "Open source RTL synthesis tool" },
     @{ Name = "icestorm"; Source = "choco"; Description = "FPGA tools for Lattice iCE40" },
-    @{ Name = "verilator"; Source = "choco"; Description = "Fast Verilog/SystemVerilog simulator" }
+    @{ Name = "verilator"; Source = "choco"; Description = "Fast Verilog/SystemVerilog simulator" },
+    
+    # MiSTer FPGA tools and utilities
+    @{ Name = "mister-devel.update_all"; Source = "choco"; Description = "MiSTer FPGA comprehensive update script" },
+    @{ Name = "mister-devel.mister_offline"; Source = "choco"; Description = "MiSTer Offline Update utility" },
+    @{ Name = "mister-tools"; Source = "choco"; Description = "MiSTer configuration and management tools" }
+)
+
+# Add a dedicated MiSTer tools category for more specialized tools
+$misterTools = @(
+    @{ Name = "MiSTer.MiSTerConfigurator"; Source = "winget"; Description = "MiSTer configuration GUI tool" },
+    @{ Name = "mister-ini-editor"; Source = "choco"; Description = "Editor for MiSTer INI configuration files" },
+    @{ Name = "mister-batch-control"; Source = "choco"; Description = "Batch control and management for MiSTer FPGA" }
 )
 
 $gamingEmulationTools = @(
@@ -90,7 +102,10 @@ $romManagementTools = @(
 # Create a new category for handheld device management tools
 $handheldDeviceTools = @(
     @{ Name = "AnalogueOS.PocketUpdater"; Source = "winget"; Description = "Firmware updater for Analogue Pocket console" },
-    @{ Name = "AnalogueOS.PocketSync"; Source = "winget"; Description = "Sync tool for Analogue Pocket console" }
+    @{ Name = "AnalogueOS.PocketSync"; Source = "winget"; Description = "Sync tool for Analogue Pocket console" },
+    
+    # MiSTer can also be considered a handheld/portable device in some configurations
+    @{ Name = "mister-wifi-config"; Source = "choco"; Description = "WiFi configuration tool for MiSTer FPGA portables" }
 )
 
 $supportingTools = @(
@@ -275,8 +290,21 @@ function Install-Package {
         return $false
     }
     
+    # Define list of optional packages that might have availability issues
+    $optionalPackages = @(
+        "1g1r", 
+        "jdownloader2", 
+        "mister-devel.update_all", 
+        "mister-devel.mister_offline", 
+        "mister-tools", 
+        "MiSTer.MiSTerConfigurator", 
+        "mister-ini-editor", 
+        "mister-batch-control", 
+        "mister-wifi-config"
+    )
+    
     # Special handling for packages that might have availability issues
-    if ($Package.Name -eq "1g1r" -or $Package.Name -eq "jdownloader2") {
+    if ($optionalPackages -contains $Package.Name) {
         Write-Log -Message "Attempting to install optional package '$($Package.Name)' ($($Package.Description))..." -Level 'Info'
         try {
             if ($Package.Source -eq "winget") {
@@ -340,13 +368,14 @@ function Show-MainMenu {
     Clear-Host
     Write-Host "================ Developer Tools Installation ================" -ForegroundColor Green
     Write-Host "1. Install Development Tools (VS Code, Git, Python, etc.)" -ForegroundColor Cyan
-    Write-Host "2. Install FPGA Tools (Xilinx Vivado, Intel Quartus, etc.)" -ForegroundColor Cyan
+    Write-Host "2. Install FPGA Tools (Xilinx Vivado, Intel Quartus, MiSTer, etc.)" -ForegroundColor Cyan
     Write-Host "3. Install Gaming/Emulation Tools (RetroArch, Dolphin, etc.)" -ForegroundColor Cyan
     Write-Host "4. Install ROM Management Tools (LaunchBox, RomVault, etc.)" -ForegroundColor Cyan
     Write-Host "5. Install Supporting Tools (7-Zip, DirectX, etc.)" -ForegroundColor Cyan
     Write-Host "6. Install Handheld Device Tools (Pocket Updater, Pocket Sync)" -ForegroundColor Cyan
-    Write-Host "7. Install All Categories" -ForegroundColor Yellow
-    Write-Host "8. Custom Installation (Select individual packages)" -ForegroundColor Yellow
+    Write-Host "7. Install MiSTer FPGA Tools" -ForegroundColor Cyan
+    Write-Host "8. Install All Categories" -ForegroundColor Yellow
+    Write-Host "9. Custom Installation (Select individual packages)" -ForegroundColor Yellow
     Write-Host "Q. Quit" -ForegroundColor Red
     Write-Host "================================================================" -ForegroundColor Green
     Write-Host ""
@@ -539,6 +568,15 @@ function Start-CustomInstallation {
         }
     }
     
+    # MiSTer FPGA Tools
+    $selectedMisterTools = Show-PackageSelectionMenu -Packages $misterTools -CategoryName "MiSTer FPGA Tools"
+    if ($selectedMisterTools.Count -gt 0) {
+        $categoriesToInstall += @{
+            Packages = $selectedMisterTools
+            CategoryName = "MiSTer FPGA Tools"
+        }
+    }
+    
     # Install selected packages
     foreach ($category in $categoriesToInstall) {
         Install-Category -Packages $category.Packages -CategoryName $category.CategoryName
@@ -579,11 +617,14 @@ try {
         [switch]$HandheldTools,
         
         [Parameter(Mandatory = $false)]
+        [switch]$MisterTools,
+        
+        [Parameter(Mandatory = $false)]
         [switch]$NonInteractive
     )
     
     # Non-interactive mode with command-line parameters
-    if ($NonInteractive -or $AllCategories -or $DevTools -or $FpgaTools -or $GamingTools -or $RomTools -or $SupportingTools -or $HandheldTools) {
+    if ($NonInteractive -or $AllCategories -or $DevTools -or $FpgaTools -or $GamingTools -or $RomTools -or $SupportingTools -or $HandheldTools -or $MisterTools) {
         if ($AllCategories -or $DevTools) {
             Install-Category -Packages $developmentTools -CategoryName "Development Tools"
         }
@@ -606,6 +647,10 @@ try {
         
         if ($AllCategories -or $HandheldTools) {
             Install-Category -Packages $handheldDeviceTools -CategoryName "Handheld Device Tools"
+        }
+        
+        if ($AllCategories -or $MisterTools) {
+            Install-Category -Packages $misterTools -CategoryName "MiSTer FPGA Tools"
         }
     }
     # Interactive mode with menu
@@ -641,6 +686,22 @@ try {
                     [void][System.Console]::ReadKey($true)
                 }
                 "7" {
+                    Install-Category -Packages $misterTools -CategoryName "MiSTer FPGA Tools"
+                    Write-Host "Press any key to continue..."
+                    [void][System.Console]::ReadKey($true)
+                }
+                "8" {
+                    Install-Category -Packages $developmentTools -CategoryName "Development Tools"
+                    Install-Category -Packages $fpgaTools -CategoryName "FPGA Tools"
+                    Install-Category -Packages $gamingEmulationTools -CategoryName "Gaming/Emulation Tools"
+                    Install-Category -Packages $romManagementTools -CategoryName "ROM Management Tools"
+                    Install-Category -Packages $supportingTools -CategoryName "Supporting Tools"
+                    Install-Category -Packages $handheldDeviceTools -CategoryName "Handheld Device Tools"
+                    Install-Category -Packages $misterTools -CategoryName "MiSTer FPGA Tools"
+                    Write-Host "Press any key to continue..."
+                    [void][System.Console]::ReadKey($true)
+                }
+                "9" {
                     Start-CustomInstallation
                     Write-Host "Press any key to continue..."
                     [void][System.Console]::ReadKey($true)
