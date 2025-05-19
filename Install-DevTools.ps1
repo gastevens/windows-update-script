@@ -75,7 +75,19 @@ $romManagementTools = @(
     @{ Name = "LaunchBox.LaunchBox"; Source = "winget"; Description = "Game library manager and launcher" },
     @{ Name = "romcenter"; Source = "choco"; Description = "ROM management and verification" },
     @{ Name = "clrmamepro"; Source = "choco"; Description = "ROM manager and verification tool" },
-    @{ Name = "JRiver.MediaCenter"; Source = "winget"; Description = "Media library management" }
+    @{ Name = "JRiver.MediaCenter"; Source = "winget"; Description = "Media library management" },
+    
+    # ROM and system management additions
+    @{ Name = "Rufus.Rufus"; Source = "winget"; Description = "Bootable USB creator tool" },
+    @{ Name = "mame-tools"; Source = "choco"; Description = "Tools for MAME ROM management" },
+    @{ Name = "sabretools"; Source = "choco"; Description = "Tools for ROM identification and management" },
+    @{ Name = "romvault"; Source = "choco"; Description = "ROM collection management and verification" }
+)
+
+# Create a new category for handheld device management tools
+$handheldDeviceTools = @(
+    @{ Name = "AnalogueOS.PocketUpdater"; Source = "winget"; Description = "Firmware updater for Analogue Pocket console" },
+    @{ Name = "AnalogueOS.PocketSync"; Source = "winget"; Description = "Sync tool for Analogue Pocket console" }
 )
 
 $supportingTools = @(
@@ -305,10 +317,11 @@ function Show-MainMenu {
     Write-Host "1. Install Development Tools (VS Code, Git, Python, etc.)" -ForegroundColor Cyan
     Write-Host "2. Install FPGA Tools (Xilinx Vivado, Intel Quartus, etc.)" -ForegroundColor Cyan
     Write-Host "3. Install Gaming/Emulation Tools (RetroArch, Dolphin, etc.)" -ForegroundColor Cyan
-    Write-Host "4. Install ROM Management Tools (LaunchBox, etc.)" -ForegroundColor Cyan
+    Write-Host "4. Install ROM Management Tools (LaunchBox, RomVault, etc.)" -ForegroundColor Cyan
     Write-Host "5. Install Supporting Tools (7-Zip, DirectX, etc.)" -ForegroundColor Cyan
-    Write-Host "6. Install All Categories" -ForegroundColor Yellow
-    Write-Host "7. Custom Installation (Select individual packages)" -ForegroundColor Yellow
+    Write-Host "6. Install Handheld Device Tools (Pocket Updater, Pocket Sync)" -ForegroundColor Cyan
+    Write-Host "7. Install All Categories" -ForegroundColor Yellow
+    Write-Host "8. Custom Installation (Select individual packages)" -ForegroundColor Yellow
     Write-Host "Q. Quit" -ForegroundColor Red
     Write-Host "================================================================" -ForegroundColor Green
     Write-Host ""
@@ -492,6 +505,15 @@ function Start-CustomInstallation {
         }
     }
     
+    # Handheld Device Tools
+    $selectedHandheldTools = Show-PackageSelectionMenu -Packages $handheldDeviceTools -CategoryName "Handheld Device Tools"
+    if ($selectedHandheldTools.Count -gt 0) {
+        $categoriesToInstall += @{
+            Packages = $selectedHandheldTools
+            CategoryName = "Handheld Device Tools"
+        }
+    }
+    
     # Install selected packages
     foreach ($category in $categoriesToInstall) {
         Install-Category -Packages $category.Packages -CategoryName $category.CategoryName
@@ -529,11 +551,14 @@ try {
         [switch]$SupportingTools,
         
         [Parameter(Mandatory = $false)]
+        [switch]$HandheldTools,
+        
+        [Parameter(Mandatory = $false)]
         [switch]$NonInteractive
     )
     
     # Non-interactive mode with command-line parameters
-    if ($NonInteractive -or $AllCategories -or $DevTools -or $FpgaTools -or $GamingTools -or $RomTools -or $SupportingTools) {
+    if ($NonInteractive -or $AllCategories -or $DevTools -or $FpgaTools -or $GamingTools -or $RomTools -or $SupportingTools -or $HandheldTools) {
         if ($AllCategories -or $DevTools) {
             Install-Category -Packages $developmentTools -CategoryName "Development Tools"
         }
@@ -552,6 +577,10 @@ try {
         
         if ($AllCategories -or $SupportingTools) {
             Install-Category -Packages $supportingTools -CategoryName "Supporting Tools"
+        }
+        
+        if ($AllCategories -or $HandheldTools) {
+            Install-Category -Packages $handheldDeviceTools -CategoryName "Handheld Device Tools"
         }
     }
     # Interactive mode with menu
@@ -582,15 +611,6 @@ try {
                     [void][System.Console]::ReadKey($true)
                 }
                 "5" {
-                    Install-Category -Packages $supportingTools -CategoryName "Supporting Tools"
-                    Write-Host "Press any key to continue..."
-                    [void][System.Console]::ReadKey($true)
-                }
-                "6" {
-                    Install-Category -Packages $developmentTools -CategoryName "Development Tools"
-                    Install-Category -Packages $fpgaTools -CategoryName "FPGA Tools"
-                    Install-Category -Packages $gamingEmulationTools -CategoryName "Gaming/Emulation Tools"
-                    Install-Category -Packages $romManagementTools -CategoryName "ROM Management Tools"
                     Install-Category -Packages $supportingTools -CategoryName "Supporting Tools"
                     Write-Host "Press any key to continue..."
                     [void][System.Console]::ReadKey($true)
