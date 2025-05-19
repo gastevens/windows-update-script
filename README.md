@@ -30,7 +30,8 @@ This script provides an interactive and automated way to install specialized sof
 - **Development Tools**: VS Code, Git, Python, Node.js, Visual Studio, Docker Desktop, etc.
 - **FPGA Tools**: Xilinx Vivado, Intel Quartus, Yosys, NextPNR, etc.
 - **Gaming/Emulation Tools**: RetroArch, Dolphin, PCSX2, RPCS3, Citra, etc.
-- **ROM Management Tools**: LaunchBox, ROMCenter, ClrMamePro, etc.
+- **ROM Management Tools**: LaunchBox, ROMCenter, ClrMamePro, Rufus, MAME Tools, SabreTools, RomVault, etc.
+- **Handheld Device Tools**: Analogue Pocket Updater, Pocket Sync
 - **Supporting Tools**: 7-Zip, DirectX, Visual C++ Redistributables, NVIDIA drivers, etc.
 
 The script validates if the required package managers are installed, checks if packages are already installed before attempting installation, and provides detailed logs and summaries of all operations.
@@ -46,6 +47,7 @@ The script validates if the required package managers are installed, checks if p
 - Internet connectivity
 - For FPGA development: Sufficient disk space (20+ GB) for tools like Xilinx Vivado or Intel Quartus
 - For Gaming/Emulation: A capable GPU for optimal performance
+- For Handheld Device Tools: USB connectivity for device management
 
 ## Installation
 
@@ -119,8 +121,9 @@ This will display a menu with the following options:
 3. Install Gaming/Emulation Tools
 4. Install ROM Management Tools
 5. Install Supporting Tools
-6. Install All Categories
-7. Custom Installation (select individual packages)
+6. Install Handheld Device Tools
+7. Install All Categories
+8. Custom Installation (select individual packages)
 
 #### Non-Interactive Mode
 
@@ -142,6 +145,7 @@ You can also run the script with parameters for automated installation:
 # -GamingTools      : Install gaming/emulation tools
 # -RomTools         : Install ROM management tools
 # -SupportingTools  : Install supporting tools
+# -HandheldTools    : Install handheld device management tools
 # -AllCategories    : Install all categories
 # -NonInteractive   : Run in non-interactive mode
 ```
@@ -172,6 +176,7 @@ You can also run the script with parameters for automated installation:
   - FPGA development tools
   - Gaming and emulation software
   - ROM management utilities
+  - Handheld device management tools
   - Supporting system tools
 - **Smart Installation**:
   - Skips already installed packages
