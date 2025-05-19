@@ -8,6 +8,13 @@ A comprehensive PowerShell script for automating system updates on Windows syste
 
 ## Overview
 
+This repository contains PowerShell scripts for Windows system maintenance and software installation:
+
+1. **Update-System.ps1**: Automates the update process for Windows systems
+2. **Install-DevTools.ps1**: Installs specialized software for development, FPGA, gaming, and more
+
+### Update-System.ps1
+
 This script automates the update process for Windows systems by combining multiple update mechanisms into a single, convenient script:
 
 - Windows package management with **winget**
@@ -16,15 +23,29 @@ This script automates the update process for Windows systems by combining multip
 
 The script includes robust error handling, detailed logging, and administrative privilege verification to ensure updates are properly applied.
 
+### Install-DevTools.ps1
+
+This script provides an interactive and automated way to install specialized software in several categories:
+
+- **Development Tools**: VS Code, Git, Python, Node.js, Visual Studio, Docker Desktop, etc.
+- **FPGA Tools**: Xilinx Vivado, Intel Quartus, Yosys, NextPNR, etc.
+- **Gaming/Emulation Tools**: RetroArch, Dolphin, PCSX2, RPCS3, Citra, etc.
+- **ROM Management Tools**: LaunchBox, ROMCenter, ClrMamePro, etc.
+- **Supporting Tools**: 7-Zip, DirectX, Visual C++ Redistributables, NVIDIA drivers, etc.
+
+The script validates if the required package managers are installed, checks if packages are already installed before attempting installation, and provides detailed logs and summaries of all operations.
+
 ## Prerequisites
 
 - **Windows 10/11** operating system
-- **PowerShell 7.0 or higher** (script will not work properly with Windows PowerShell 5.1)
+- **PowerShell 7.0 or higher** (scripts will not work properly with Windows PowerShell 5.1)
 - **Administrator privileges** (required for installation and updates)
 - **Package managers**:
   - [winget](https://github.com/microsoft/winget-cli) (Windows Package Manager)
-  - [Chocolatey](https://chocolatey.org/install) (Optional, but recommended)
+  - [Chocolatey](https://chocolatey.org/install) (Optional for Update-System.ps1, but enables more packages in Install-DevTools.ps1)
 - Internet connectivity
+- For FPGA development: Sufficient disk space (20+ GB) for tools like Xilinx Vivado or Intel Quartus
+- For Gaming/Emulation: A capable GPU for optimal performance
 
 ## Installation
 
@@ -51,7 +72,9 @@ The script includes robust error handling, detailed logging, and administrative 
 
 ## Usage
 
-### Basic Usage
+### Update-System.ps1
+
+#### Basic Usage
 
 Run the script with administrative privileges:
 
@@ -63,7 +86,7 @@ cd path\to\windows-update-script
 .\Update-System.ps1
 ```
 
-### Scheduled Task
+#### Scheduled Task
 
 You can set up a scheduled task to run this script automatically:
 
@@ -76,7 +99,56 @@ You can set up a scheduled task to run this script automatically:
      - Program/script: `powershell.exe`
      - Arguments: `-ExecutionPolicy Bypass -File "C:\path\to\Update-System.ps1"`
 
+### Install-DevTools.ps1
+
+#### Interactive Mode
+
+Run the script with administrative privileges to use the interactive menu:
+
+```powershell
+# Navigate to the script location
+cd path\to\windows-update-script
+
+# Run the script with interactive menu
+.\Install-DevTools.ps1
+```
+
+This will display a menu with the following options:
+1. Install Development Tools
+2. Install FPGA Tools
+3. Install Gaming/Emulation Tools
+4. Install ROM Management Tools
+5. Install Supporting Tools
+6. Install All Categories
+7. Custom Installation (select individual packages)
+
+#### Non-Interactive Mode
+
+You can also run the script with parameters for automated installation:
+
+```powershell
+# Install all development tools
+.\Install-DevTools.ps1 -DevTools
+
+# Install FPGA and gaming tools
+.\Install-DevTools.ps1 -FpgaTools -GamingTools
+
+# Install all categories
+.\Install-DevTools.ps1 -AllCategories
+
+# Available parameters
+# -DevTools         : Install development tools
+# -FpgaTools        : Install FPGA development tools
+# -GamingTools      : Install gaming/emulation tools
+# -RomTools         : Install ROM management tools
+# -SupportingTools  : Install supporting tools
+# -AllCategories    : Install all categories
+# -NonInteractive   : Run in non-interactive mode
+```
+
 ## Features
+
+### Update-System.ps1
 
 - **Administrative Privilege Check**: Ensures the script is run with the proper permissions
 - **Multi-Package Manager Support**:
@@ -89,16 +161,36 @@ You can set up a scheduled task to run this script automatically:
 - **Error Handling**: Graceful handling of failures
 - **Update Summary**: Provides a concise summary of update operations
 
+### Install-DevTools.ps1
+
+- **Interactive Menu System**: Easy-to-use interface for selecting software to install
+- **Multi-Package Manager Support**:
+  - Windows Package Manager (winget)
+  - Chocolatey Package Manager
+- **Specialized Software Categories**:
+  - Development tools for programmers
+  - FPGA development tools
+  - Gaming and emulation software
+  - ROM management utilities
+  - Supporting system tools
+- **Smart Installation**:
+  - Skips already installed packages
+  - Handles dependencies automatically
+  - Adapts to available package managers
+- **Custom Installation**: Cherry-pick specific packages from each category
+- **Command-Line Parameters**: Support for automated/scripted installation
+- **Comprehensive Logging and Summary**: Track all installation operations
+
 ## Logs
 
-By default, logs are stored in:
-```
-%USERPROFILE%\Logs\SystemUpdate_[TIMESTAMP].log
-```
+Both scripts store logs in the `%USERPROFILE%\Logs` directory:
 
-The log file contains detailed information about:
+- **Update-System.ps1**: `SystemUpdate_[TIMESTAMP].log`
+- **Install-DevTools.ps1**: `DevTools_Installation_[TIMESTAMP].log`
+
+The log files contain detailed information about:
 - Start and end times
-- Success or failure of each update operation
+- Success or failure of each operation
 - Errors encountered during execution
 - Summary of all operations
 
